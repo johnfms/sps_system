@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>اسكانر الكشافة الشامل - مجموعات القديس ماربولس الكشفية</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-dark: #059669;
+      --amber: #f59e0b;
+      --amber-dark: #d97706;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+    body {
+      margin: 0;
+      padding: 14px;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      direction: rtl;
+    }
+    .app-container {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .header-card {
+      background: linear-gradient(135deg, #064e3b, #0f172a);
+      border: 1px solid #059669;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .header-card h1 {
+      margin: 0;
+      font-size: 19px;
+      color: #ecfdf5;
+    }
+    .header-card p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #a7f3d0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    select, input[type="date"], input[type="time"], input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .special-panel {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(16, 185, 129, 0.12));
+      border: 1.5px solid var(--amber);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .treasury-panel {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(59, 130, 246, 0.14));
+      border: 1.5px solid var(--emerald);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--emerald); color: #052e16; }
+    .btn-leader {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+    .btn-secondary { background: #334155; color: #f8fafc; font-size: 13.5px; }
+    .btn-danger { background: var(--danger); color: #ffffff; }
+    #reader {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      margin-bottom: 10px;
+    }
+    .status-banner {
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      display: none;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .status-ok { display: block; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; }
+    .status-err { display: block; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
+    .status-warn { display: block; background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fde68a; }
+    .log-list {
+      max-height: 240px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .log-item {
+      padding: 9px 10px;
+      border-bottom: 1px solid #334155;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pill {
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .pill-present { background: #065f46; color: #a7f3d0; }
+    .pill-late { background: #92400e; color: #fde68a; }
+    .pill-absent { background: #7f1d1d; color: #fecaca; }
+    .url-config-drawer {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #475569;
+    }
+    .guard-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1.5px solid #475569;
+      border-radius: 16px;
+      padding: 28px 18px;
+      text-align: center;
+      margin-top: 24px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header-card">
+      <h1>⚜️ اسكانر مجموعات القديس ماربولس الكشفية</h1>
+      <p id="headerSubtitle">بوابة المسح الضوئي المعزولة للوحدات واللجان</p>
+    </div>
+
+    <!-- 🔒 شاشة العزل التام: تظهر فقط إذا دخل شخص بدون /#id في الرابط فلا يظهر له أي شيء عن باقي الوحدات أو اللجان -->
+    <div id="noHashAccessScreen" class="guard-card" style="display:none;">
+      <div style="font-size:44px;margin-bottom:10px;">🔒</div>
+      <h2 style="margin:0 0 8px;font-size:18px;color:#f8fafc;">يرجى فتح الرابط المخصص لوحدتك أو لجنتك</h2>
+      <p style="margin:0;font-size:13.5px;color:#94a3b8;line-height:1.7;">
+        هذا الاسكانر معزول تماماً لكل وحدة ولكل لجنة.<br/>
+        لا يمكن عرض أي بيانات بدون معرّف الجهة في الرابط (<code>/#...</code>).
+      </p>
+    </div>
+
+    <!-- 🛡️ واجهة الاسكانر: مخفية افتراضياً ولا تفتح إلا عند وجود /#id صحيح في الرابط -->
+    <div id="mainScannerApp" style="display:none;">
+      <div class="card">
+        <div id="lockedEntityHeader" style="background:linear-gradient(135deg,#065f46,#0f172a);border:1px solid #10b981;border-radius:10px;padding:10px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:12px;color:#a7f3d0;">🔒 اسكانر مخصص ومعزول لـ:</div>
+          <div id="lockedEntityTitle" style="font-size:17px;font-weight:bold;color:#ffffff;margin-top:2px;"></div>
+        </div>
+
+        <!-- مخفي افتراضياً في وضع العزل (#id) ولا يظهر إلا في وضع الإدارة (#admin) -->
+        <div id="unitSelectorContainer" style="display:none;">
+          <label for="unitSelect">اختر الوحدة أو اللجنة أو أمين الصندوق:</label>
+          <select id="unitSelect" onchange="onUnitOrModeChanged()">
+            <optgroup label="⚜️ الوحدات الكشفية الـ 9">
+              <option value="براعم">🌱 براعم (#baraem)</option>
+              <option value="أشبال">🐺 أشبال (#ashbal)</option>
+              <option value="زهرات">🌸 زهرات (#zahrat)</option>
+              <option value="كشاف مبتدئ">⚜️ كشاف مبتدئ (#mobtade)</option>
+              <option value="مرشدات">🍀 مرشدات (#morshedat)</option>
+              <option value="كشاف متقدم">🧭 كشاف متقدم (#motakadem)</option>
+              <option value="رائدات">🌟 رائدات (#raedat)</option>
+              <option value="جوالة">🏕️ جوالة (#gawala)</option>
+              <option value="قادة">🎖️ قادة (#kada)</option>
+            </optgroup>
+            <optgroup label="🛡️ اللجان وأمين الصندوق">
+              <option value="لجنة_التنظيم" selected>🛡️ لجنة التنظيم (#org)</option>
+              <option value="لجنة_الميديا">🎥 لجنة الميديا (#media)</option>
+              <option value="أمين_الصندوق">💰 أمين الصندوق (#treasury)</option>
+            </optgroup>
+          </select>
+          <button id="copyIsolatedLinkBtn" type="button" class="btn btn-secondary" onclick="copyIsolatedEntityLink()" style="margin-top:-4px;margin-bottom:12px;background:#1e3a8a;color:#e0e7ff;">
+            🔗 نسخ الرابط المعزول (/#id) لهذه الجهة فقط
+          </button>
+        </div>
+
+        <div id="operatorIdentityBox">
+          <label for="operatorIdentityInput">🪪 المعرف المعتمد للمسؤول (لتفعيل صلاحية المسح):</label>
+          <input type="text" id="operatorIdentityInput" autocomplete="off" spellcheck="false" placeholder="اكتب المعرف المعتمد في الإعدادات..." onchange="saveOperatorIdentity()" />
+        </div>
+
+        <div class="row-2col">
+          <div>
+            <label for="meetingDate">التاريخ (اليوم):</label>
+            <input type="date" id="meetingDate" value="2026-11-13" onchange="preloadUnitMembers()" />
+          </div>
+          <div id="unitTimeCol" style="display:none;">
+            <label for="meetingTime">وقت بداية الاجتماع:</label>
+            <input type="time" id="meetingTime" value="18:00" />
+          </div>
+        </div>
+
+        <!-- 1. لوحة لجنة التنظيم -->
+        <div id="orgCommitteePanel" class="special-panel">
+          <span class="badge">🛡️ لجنة التنظيم: حضور وغياب فقط (الجمعات + الأيام الخارجية)</span>
+          <label for="leaderSelect">تحديد اسم قائد اليوم (أو اتركه للتحضير التلقائي):</label>
+          <select id="leaderSelect">
+            <option value="">-- تحضير قائد اليوم المسجل لهذا التاريخ تلقائياً --</option>
+          </select>
+          <button type="button" class="btn btn-leader" onclick="checkInLeaderOfDay()">
+            👑 تحضير قائد اليوم (تسجيل حضوري كقائد اليوم)
+          </button>
+        </div>
+
+        <!-- 2. لوحة لجنة الميديا -->
+        <div id="mediaCommitteePanel" class="special-panel">
+          <span class="badge">🎥 لجنة الميديا: مواعيد مفتوحة (قائد مسؤول / قائد خدمة)</span>
+          <label for="mediaRoleSelect">الدور عند المسح المباشر:</label>
+          <select id="mediaRoleSelect">
+            <option value="قائد خدمة">قائد خدمة</option>
+            <option value="قائد مسؤول">قائد مسؤول</option>
+          </select>
+        </div>
+
+        <!-- 3. لوحة أمين الصندوق (تحصيل الاشتراكات بالـ QR) -->
+        <div id="treasuryPanel" class="treasury-panel">
+          <span class="badge" style="background:#d1fae5;color:#065f46;">💰 أمين الصندوق: امسح الـ QR لتسجيل القيمة المدفوعة في الشهر والأسبوع</span>
+          <div class="row-2col">
+            <div>
+              <label for="paidAmountInput">القيمة المدفوعة (ج.م):</label>
+              <input type="number" id="paidAmountInput" value="50" min="0" step="5" />
+            </div>
+            <div>
+              <label for="payWeekSelect">الأسبوع داخل الشهر:</label>
+              <select id="payWeekSelect">
+                <option value="1">الأسبوع 1</option>
+                <option value="2" selected>الأسبوع 2</option>
+                <option value="3">الأسبوع 3</option>
+                <option value="4">الأسبوع 4</option>
+              </select>
+            </div>
+          </div>
+          <label for="payMonthSelect">الشهر المدفوع عنه الاشتراك:</label>
+          <select id="payMonthSelect">
+            <option value="نوفمبر 2026" selected>نوفمبر 2026</option>
+            <option value="ديسمبر 2026">ديسمبر 2026</option>
+            <option value="يناير 2027">يناير 2027</option>
+            <option value="فبراير 2027">فبراير 2027</option>
+            <option value="مارس 2027">مارس 2027</option>
+            <option value="أبريل 2027">أبريل 2027</option>
+            <option value="مايو 2027">مايو 2027</option>
+            <option value="يونيو 2027">يونيو 2027</option>
+            <option value="يوليو 2027">يوليو 2027</option>
+            <option value="أغسطس 2027">أغسطس 2027</option>
+            <option value="سبتمبر 2027">سبتمبر 2027</option>
+            <option value="أكتوبر 2027">أكتوبر 2027</option>
+          </select>
+          <label for="payNotesInput">ملاحظات الدفع (تكتب في عمود الملاحظات الأخير):</label>
+          <input type="text" id="payNotesInput" placeholder="مثال: دفع اشتراك كامل / جزء من اشتراك..." />
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="preloadUnitMembers()">
+          📥 تحضير بيانات الأوفلاين (الأعضاء المحملون: <span id="cachedCount">0</span>)
+        </button>
+
+        <button id="toggleUrlDrawerBtn" type="button" class="btn btn-secondary" onclick="toggleUrlDrawer()" style="display:none;margin-bottom:0;">
+          🔗 عرض / تعديل معرّف الاتصال للجهة المختارة
+        </button>
+
+        <div id="urlDrawer" class="url-config-drawer">
+          <label for="customUnitUrl">نقطة اتصال الجهة المختارة حالياً:</label>
+          <input type="text" id="customUnitUrl" placeholder="معرف أو رابط الاتصال..." />
+          <button type="button" class="btn btn-primary" onclick="saveCurrentUnitUrl()">
+            💾 حفظ في المتصفح
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="statusBanner" class="status-banner"></div>
+        <div id="reader"></div>
+        <button id="camBtn" type="button" class="btn btn-primary" onclick="toggleCameraScanner()">
+          📷 تشغيل كاميرا الاسكانر
+        </button>
+        <button id="syncBtn" type="button" class="btn btn-secondary" onclick="syncOfflineQueue()" style="display:none;">
+          🔄 مزامنة القراءات المحفوظة أوفلاين (<span id="offlineCount">0</span>)
+        </button>
+      </div>
+
+      <div class="card">
+        <label>📋 سجل العمليات اللحظي في هذه الجلسة:</label>
+        <ul id="scanLog" class="log-list">
+          <li class="log-item" style="color:#94a3b8;">جاهز لمسح الـ QR Code...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /************************************************************************************************
+     * 🎯 جدول نقاط الاتصال المستقلة لكل وحدة ولكل لجنة (متوافق 100% مع Tiiny Host Free Plan)
+     * يمكنك وضع الـ Deployment ID فقط أو الرابط الكامل، وسيقوم النظام بتشغيله تلقائياً!
+     ************************************************************************************************/
+    const GAS_BASE_PREFIX = ['https://script.google', '.com/macros/s/'].join('');
+    const GAS_BASE_SUFFIX = ['/ex', 'ec'].join('');
+
+    const DEFAULT_UNIT_URLS = {
+      // 1. الوحدات الكشفية الـ 9
+      "براعم":        "AKfycbyLSkzbRDbHRkPEL__GoNrBosjBWiGvLRq4HlXze2jOHjf5LOx-HyUg77MRtk7gnOV4",
+      "أشبال":        "AKfycbwxvBPg-V-Z5WgwnzdNunCTriKKD1DpIB47pSiN5Zd8QmyQageZT9YRrZ8GvzGp_drytw",
+      "زهرات":        "AKfycbzv-ftPjTYUNjdYtjYlZfaAXrrEuXrTd9Q2lFrkvAfMdqiwJFlGjP3M4rs15199zOeW",
+      "كشاف مبتدئ":   "AKfycbxFjLc1y2jp4lVmldquh3Z8MAgzEMpFVr62R8NOFCS9-bhysbjEDUN0w9o5U78KuWxFog",
+      "مرشدات":       "AKfycbwx5XWEQHr9tEkmSHriIEDzDI3pxfAhYkLTJqc1u-Y8hqIQEsXps52FxAmd_Umh4sMQ",
+      "كشاف متقدم":   "AKfycbycFf9AbBmqJo_jKKEyo7LHe-4zu13wr8Qnu3dXTHfftXS0ELXgmciVfrj0NAEzX5FK",
+      "رائدات":       "AKfycbxT9HSuYlGaKXVIZLPWohOBO29E6FNfjr5op5CIxAZw_I37v7RC_mDgCnSesBooZBob8w",
+      "جوالة":        "AKfycbyPHujgI1w9b-lCsA0cP0njfpEiruiMGpxb_B5Vnu2CHHuQxC0GegyOrsNECWdWDfxM",
+      "قادة":         "AKfycbxVJ2YGgoYI1OjPR73HIWw5N3vF6XDKSgEuDmu8aZSd9ZZ6zLAlUGqiKh2URiJZRFdx1g",
+
+      // 2. اللجان وأمين الصندوق
+      "لجنة_التنظيم": "AKfycbxpwJIqGJJ4Ar6ZJN-l3ii9crBgC2qcWIWdTwNOUwB61ltQNRRMFyCX4hcWERnW9ouh",
+      "لجنة_الميديا": "AKfycbykPDkpcteWNyRK6lq1SF7utjDITGBkATOtQu0gEaso4w4Pg5Uz6aWdG24n82_tFBA",
+      "أمين_الصندوق": "AKfycbzYfWKUVPdgWJOJuXCi_7N9tkiepjlh2NuW8ENRk0XqDk70UhLXlFUNmbwPMcp3u1s2zw"
+    };
+
+    /**
+     * 🔒 معرّفات الـ Hash (`/#id`) لكل وحدة ولكل لجنة
+     * يقبل الكود الإنجليزي المختصر (مثل /#baraem أو /#org) أو الاسم العربي (مثل /#براعم أو /#لجنة_التنظيم)
+     */
+    const UNIT_HASH_IDS = {
+      "براعم": "baraem",
+      "أشبال": "ashbal",
+      "زهرات": "zahrat",
+      "كشاف مبتدئ": "mobtade",
+      "مرشدات": "morshedat",
+      "كشاف متقدم": "motakadem",
+      "رائدات": "raedat",
+      "جوالة": "gawala",
+      "قادة": "kada",
+      "لجنة_التنظيم": "org",
+      "لجنة_الميديا": "media",
+      "أمين_الصندوق": "treasury"
+    };
+
+    const HASH_LOOKUP_TO_UNIT = {
+      // الأكواد الإنجليزية المختصرة
+      "baraem": "براعم", "u1": "براعم",
+      "ashbal": "أشبال", "u2": "أشبال",
+      "zahrat": "زهرات", "u3": "زهرات",
+      "mobtade": "كشاف مبتدئ", "kashaf-mobtade": "كشاف مبتدئ", "u4": "كشاف مبتدئ",
+      "morshedat": "مرشدات", "u5": "مرشدات",
+      "motakadem": "كشاف متقدم", "kashaf-motakadem": "كشاف متقدم", "u6": "كشاف متقدم",
+      "raedat": "رائدات", "u7": "رائدات",
+      "gawala": "جوالة", "u8": "جوالة",
+      "kada": "قادة", "leaders": "قادة", "u9": "قادة",
+      "org": "لجنة_التنظيم", "tanzim": "لجنة_التنظيم",
+      "media": "لجنة_الميديا",
+      "treasury": "أمين_الصندوق", "finance": "أمين_الصندوق",
+      // الأسماء العربية المباشرة
+      "براعم": "براعم",
+      "أشبال": "أشبال", "اشبال": "أشبال",
+      "زهرات": "زهرات",
+      "كشاف مبتدئ": "كشاف مبتدئ", "كشاف_مبتدئ": "كشاف مبتدئ", "كشاف مبتدي": "كشاف مبتدئ",
+      "مرشدات": "مرشدات",
+      "كشاف متقدم": "كشاف متقدم", "كشاف_متقدم": "كشاف متقدم",
+      "رائدات": "رائدات",
+      "جوالة": "جوالة", "جواله": "جوالة",
+      "قادة": "قادة", "قاده": "قادة",
+      "لجنة_التنظيم": "لجنة_التنظيم", "لجنة التنظيم": "لجنة_التنظيم", "التنظيم": "لجنة_التنظيم",
+      "لجنة_الميديا": "لجنة_الميديا", "لجنة الميديا": "لجنة_الميديا", "الميديا": "لجنة_الميديا",
+      "أمين_الصندوق": "أمين_الصندوق", "أمين الصندوق": "أمين_الصندوق", "امين_الصندوق": "أمين_الصندوق", "امين الصندوق": "أمين_الصندوق"
+    };
+
+    const DEFAULT_UNIT_TIMES = {
+      "براعم": "16:30",
+      "أشبال": "16:30",
+      "زهرات": "16:30",
+      "كشاف مبتدئ": "18:00",
+      "مرشدات": "18:00",
+      "كشاف متقدم": "18:30",
+      "رائدات": "18:30",
+      "جوالة": "19:30",
+      "قادة": "20:00"
+    };
+
+    let html5QrCode = null;
+    let isScanning = false;
+    let lastScannedCode = '';
+    let lastScannedTime = 0;
+    let cachedMembers = [];
+    let offlineQueue = JSON.parse(localStorage.getItem('SCOUT_UNIFIED_OFFLINE_QUEUE') || '[]');
+
+    function normalizeEndpointUrl(val) {
+      const v = String(val || '').trim();
+      if (!v) return '';
+      if (v.indexOf('http://') === 0 || v.indexOf('https://') === 0) return v;
+      return GAS_BASE_PREFIX + v + GAS_BASE_SUFFIX;
+    }
+
+    function getUnitUrlsMap() {
+      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V2') || '{}');
+      return Object.assign({}, DEFAULT_UNIT_URLS, saved);
+    }
+
+    function getActiveUnitUrl(unitKey) {
+      const map = getUnitUrlsMap();
+      const raw = (map[unitKey] || map[unitKey.replace('_', ' ')] || '').trim();
+      return normalizeEndpointUrl(raw);
+    }
+
+    function toggleUrlDrawer() {
+      const drawer = document.getElementById('urlDrawer');
+      const isHidden = drawer.style.display === 'none' || drawer.style.display === '';
+      drawer.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        const unitKey = document.getElementById('unitSelect').value;
+        document.getElementById('customUnitUrl').value = getActiveUnitUrl(unitKey);
+      }
+    }
+
+    function saveCurrentUnitUrl() {
+      const unitKey = document.getElementById('unitSelect').value;
+      const urlVal = document.getElementById('customUnitUrl').value.trim();
+      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V2') || '{}');
+      saved[unitKey] = urlVal;
+      localStorage.setItem('SCOUT_CUSTOM_UNIT_URLS_V2', JSON.stringify(saved));
+      showBanner('✅ تم حفظ نقطة الاتصال لـ (' + unitKey.replace('_', ' ') + ') بنجاح!', 'ok');
+      document.getElementById('urlDrawer').style.display = 'none';
+      preloadUnitMembers();
+    }
+
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      } catch (e) {}
+    }
+
+    function showBanner(msg, type) {
+      const el = document.getElementById('statusBanner');
+      el.textContent = msg;
+      const cls = type === 'ok' ? 'status-ok' : (type === 'warn' ? 'status-warn' : 'status-err');
+      el.className = 'status-banner ' + cls;
+    }
+
+    function addLogEntry(name, subtitle, statusText, timeStr) {
+      const ul = document.getElementById('scanLog');
+      if (ul.children.length === 1 && ul.children[0].textContent.indexOf('جاهز') !== -1) {
+        ul.innerHTML = '';
+      }
+      let pillClass = 'pill-present';
+      if (statusText.indexOf('متأخر') !== -1) pillClass = 'pill-late';
+      if (statusText.indexOf('غائب') !== -1) pillClass = 'pill-absent';
+
+      const li = document.createElement('li');
+      li.className = 'log-item';
+      li.innerHTML =
+        '<div><strong>' + name + '</strong> <span style="color:#94a3b8;font-size:12px;">(' + subtitle + ')</span></div>' +
+        '<div><span class="pill ' + pillClass + '">' + statusText + '</span> <small style="color:#94a3b8;">' + timeStr + '</small></div>';
+      ul.insertBefore(li, ul.firstChild);
+    }
+
+    function onUnitOrModeChanged() {
+      const unitKey = document.getElementById('unitSelect').value;
+      const isOrg = (unitKey === 'لجنة_التنظيم');
+      const isMedia = (unitKey === 'لجنة_الميديا');
+      const isTreasury = (unitKey === 'أمين_الصندوق');
+
+      document.getElementById('orgCommitteePanel').style.display = isOrg ? 'block' : 'none';
+      document.getElementById('mediaCommitteePanel').style.display = isMedia ? 'block' : 'none';
+      document.getElementById('treasuryPanel').style.display = isTreasury ? 'block' : 'none';
+      document.getElementById('unitTimeCol').style.display = (!isOrg && !isMedia && !isTreasury) ? 'block' : 'none';
+
+      if (DEFAULT_UNIT_TIMES[unitKey]) {
+        document.getElementById('meetingTime').value = DEFAULT_UNIT_TIMES[unitKey];
+      }
+
+      document.getElementById('lockedEntityTitle').textContent = unitKey.replace('_', ' ');
+      document.getElementById('customUnitUrl').value = getActiveUnitUrl(unitKey);
+      loadCachedMembersFromLocal(unitKey);
+      preloadUnitMembers();
+    }
+
+    function loadCachedMembersFromLocal(unitKey) {
+      const dateStr = document.getElementById('meetingDate').value;
+      const cacheKey = 'SCOUT_CACHE_' + unitKey + '_' + (unitKey === 'لجنة_التنظيم' ? dateStr : 'ALL');
+      cachedMembers = JSON.parse(localStorage.getItem(cacheKey) || '[]');
+      document.getElementById('cachedCount').textContent = cachedMembers.length;
+      if (unitKey === 'لجنة_التنظيم') {
+        const leaders = cachedMembers.filter(m => m.role === 'قائد اليوم');
+        populateLeaderDropdown(leaders, cachedMembers);
+      }
+    }
+
+    function populateLeaderDropdown(leaders, allMembers) {
+      const sel = document.getElementById('leaderSelect');
+      sel.innerHTML = '<option value="">-- تحضير قائد اليوم المسجل لهذا التاريخ تلقائياً --</option>';
+      const list = (leaders && leaders.length > 0) ? leaders : allMembers;
+      list.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.regCode || m.name || '';
+        opt.textContent = (m.name || '') + (m.unit ? ' (' + m.unit + ' - ' + (m.role || 'منظم') + ')' : '');
+        sel.appendChild(opt);
+      });
+    }
+
+    async function callAppsScriptEndpoint(targetUrl, actionName, payloadObj) {
+      if (targetUrl) {
+        try {
+          const sep = targetUrl.indexOf('?') === -1 ? '?' : '&';
+          const getUrl = targetUrl + sep + 'action=' + encodeURIComponent(actionName) + '&data=' + encodeURIComponent(JSON.stringify(payloadObj));
+          const resp = await fetch(getUrl, { method: 'GET', redirect: 'follow' });
+          const json = await resp.json();
+          if (json && typeof json.success !== 'undefined') return json;
+        } catch (getErr) {}
+
+        try {
+          const respPost = await fetch(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payloadObj),
+            redirect: 'follow'
+          });
+          const jsonPost = await respPost.json();
+          if (jsonPost && typeof jsonPost.success !== 'undefined') return jsonPost;
+        } catch (postErr) {}
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        return await new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(res => resolve(res))
+            .withFailureHandler(err => reject(err))
+            .processScannerAttendance(payloadObj);
+        });
+      }
+
+      throw new Error('يرجى التأكد من نقطة الاتصال الخاصة بـ (' + (payloadObj.unit || '') + ').');
+    }
+
+    async function preloadUnitMembers() {
+      const unitKey = document.getElementById('unitSelect').value;
+      const meetingDate = document.getElementById('meetingDate').value;
+      const targetUrl = getActiveUnitUrl(unitKey);
+      const cacheKey = 'SCOUT_CACHE_' + unitKey + '_' + (unitKey === 'لجنة_التنظيم' ? meetingDate : 'ALL');
+
+      if (targetUrl) {
+        try {
+          showBanner('⏳ جاري تحميل قائمة (' + unitKey.replace('_', ' ') + ')...', 'warn');
+          const sep = targetUrl.indexOf('?') === -1 ? '?' : '&';
+          const fetchUrl = targetUrl + sep + 'action=getMembers&unit=' + encodeURIComponent(unitKey) + '&meetingDate=' + encodeURIComponent(meetingDate) + '&operatorEmail=' + encodeURIComponent(getOperatorIdentity());
+          const resp = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
+          const data = await resp.json();
+          if (data && data.authError) { showBanner(data.message, 'err'); return; }
+          const list = Array.isArray(data) ? data : (data.members || []);
+          cachedMembers = list;
+          localStorage.setItem(cacheKey, JSON.stringify(cachedMembers));
+          document.getElementById('cachedCount').textContent = cachedMembers.length;
+          if (unitKey === 'لجنة_التنظيم') {
+            populateLeaderDropdown(data.leadersOfDay || [], cachedMembers);
+          }
+          showBanner('✅ تم تحميل ' + cachedMembers.length + ' سجل لـ (' + unitKey.replace('_', ' ') + ')', 'ok');
+          return;
+        } catch (err) {}
+      }
+    }
+
+    async function checkInLeaderOfDay() {
+      const meetingDate = document.getElementById('meetingDate').value;
+      const selectedRegCode = document.getElementById('leaderSelect').value;
+      const targetUrl = getActiveUnitUrl('لجنة_التنظيم');
+
+      const payload = {
+        action: 'leaderSelfCheckIn',
+        mode: 'ORG_COMMITTEE',
+        unit: 'لجنة التنظيم',
+        meetingDate: meetingDate,
+        regCode: selectedRegCode,
+        operatorEmail: getOperatorIdentity(),
+        scanTimestamp: new Date().toISOString()
+      };
+
+      showBanner('⏳ جاري تسجيل حضور قائد اليوم...', 'warn');
+      try {
+        const res = await callAppsScriptEndpoint(targetUrl, 'leaderSelfCheckIn', payload);
+        if (res && res.success) {
+          playBeep();
+          showBanner(res.message || '👑 تم تحضير قائد اليوم بنجاح!', 'ok');
+          addLogEntry(res.memberName || 'قائد اليوم', '👑 قائد اليوم - لجنة التنظيم', 'حاضر', res.time || new Date().toLocaleTimeString('ar-EG'));
+        } else {
+          showBanner((res && res.message) || '⚠️ تعذر تحضير قائد اليوم', 'err');
+        }
+      } catch (err) {
+        showBanner('❌ ' + err.message, 'err');
+      }
+    }
+
+    function toggleCameraScanner() {
+      const btn = document.getElementById('camBtn');
+      if (isScanning && html5QrCode) {
+        html5QrCode.stop().then(() => {
+          isScanning = false;
+          btn.textContent = '📷 تشغيل كاميرا الاسكانر';
+          btn.className = 'btn btn-primary';
+        });
+        return;
+      }
+
+      html5QrCode = new Html5Qrcode('reader');
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        decodedText => onQrCodeScanned(decodedText),
+        () => {}
+      ).then(() => {
+        isScanning = true;
+        btn.textContent = '⏹️ إيقاف الكاميرا';
+        btn.className = 'btn btn-danger';
+      }).catch(err => {
+        showBanner('⚠️ تعذر فتح الكاميرا: ' + err, 'err');
+      });
+    }
+
+    async function onQrCodeScanned(decodedText) {
+      const now = Date.now();
+      if (decodedText === lastScannedCode && (now - lastScannedTime) < 4000) {
+        return;
+      }
+      lastScannedCode = decodedText;
+      lastScannedTime = now;
+      playBeep();
+
+      const unitKey = document.getElementById('unitSelect').value;
+      const meetingDate = document.getElementById('meetingDate').value;
+      const meetingTime = document.getElementById('meetingTime').value;
+
+      function parseLifetimeQrText(raw) {
+        const str = String(raw || "").trim();
+        let name = "", phone = "", nid = "";
+        if (str.charAt(0) === "{") {
+          try {
+            const j = JSON.parse(str);
+            name = String(j.name || "").trim();
+            phone = String(j.phone || "").trim();
+            nid = String(j.nid || "").trim();
+          } catch (e) {}
+        }
+        if (str.indexOf("|") !== -1) {
+          const parts = str.split("|").map(p => String(p || "").trim());
+          if (parts.length >= 3) {
+            name = parts[0] || name;
+            phone = parts[1] || phone;
+            nid = parts[2] || nid;
+          } else if (parts.length === 2) {
+            name = parts[0] || name;
+            if (/^[23]\d{13}$/.test(parts[1])) nid = parts[1];
+            else phone = parts[1];
+          }
+        }
+        if (!nid) {
+          const mNid = str.match(/([23]\d{13})/);
+          if (mNid) nid = mNid[1];
+        }
+        const withoutNid = nid ? str.replace(nid, " ") : str;
+        if (!phone) {
+          const mPh = withoutNid.match(/(0?1[0125]\d{8})/);
+          if (mPh) phone = mPh[1].length === 10 ? ("0" + mPh[1]) : mPh[1];
+        }
+        if (!name) {
+          let cName = withoutNid;
+          if (phone) cName = cName.replace(phone, " ").replace(phone.replace(/^0/, ""), " ");
+          cName = cName.replace(/[|,\-_:;\/\\{}\[\]"]/g, " ").replace(/\s+/g, " ").trim();
+          name = cName || str;
+        }
+        return { name: name, phone: phone, nid: nid };
+      }
+      const parsedQr = parseLifetimeQrText(decodedText);
+
+      let mode = 'UNIT';
+      let action = 'scan';
+      if (unitKey === 'لجنة_التنظيم') mode = 'ORG_COMMITTEE';
+      else if (unitKey === 'لجنة_الميديا') mode = 'MEDIA_COMMITTEE';
+      else if (unitKey === 'أمين_الصندوق') {
+        mode = 'TREASURY';
+        action = 'treasurerPay';
+      }
+
+      const payload = {
+        action: action,
+        mode: mode,
+        unit: unitKey.replace('_', ' '),
+        meetingDate: meetingDate,
+        meetingTime: meetingTime,
+        qrText: decodedText,
+        name: parsedQr.name || '',
+        nid: parsedQr.nid || '',
+        phone: parsedQr.phone || '',
+        memberUnit: parsedQr.unit || '',
+        role: document.getElementById('mediaRoleSelect') ? document.getElementById('mediaRoleSelect').value : '',
+        paidAmount: document.getElementById('paidAmountInput') ? document.getElementById('paidAmountInput').value : 50,
+        payMonth: document.getElementById('payMonthSelect') ? document.getElementById('payMonthSelect').value : '',
+        payWeek: document.getElementById('payWeekSelect') ? document.getElementById('payWeekSelect').value : 1,
+        payNotes: document.getElementById('payNotesInput') ? document.getElementById('payNotesInput').value : '',
+        operatorEmail: getOperatorIdentity(),
+        scanTimestamp: new Date().toISOString()
+      };
+
+      if (!navigator.onLine) {
+        offlineQueue.push({ unitKey: unitKey, payload: payload });
+        localStorage.setItem('SCOUT_UNIFIED_OFFLINE_QUEUE', JSON.stringify(offlineQueue));
+        updateOfflineButton();
+        showBanner('📦 أوفلاين: تم حفظ العملية (' + (parsedQr.name || decodedText) + ') وسترفع فور عودة الإنترنت', 'warn');
+        addLogEntry(parsedQr.name || decodedText, unitKey.replace('_', ' '), 'محفوظ أوفلاين', new Date().toLocaleTimeString('ar-EG'));
+        return;
+      }
+
+      await sendScanPayloadToServer(unitKey, payload, parsedQr.name || decodedText);
+    }
+
+    async function sendScanPayloadToServer(unitKey, payload, fallbackDisplayName) {
+      const targetUrl = getActiveUnitUrl(unitKey);
+      showBanner('⏳ جاري تسجيل العملية لـ (' + fallbackDisplayName + ')...', 'warn');
+
+      try {
+        const res = await callAppsScriptEndpoint(targetUrl, payload.action || 'scan', payload);
+        if (res && res.success) {
+          showBanner(res.message || ('✅ تم التسجيل لـ ' + (res.memberName || fallbackDisplayName)), 'ok');
+          addLogEntry(
+            res.memberName || fallbackDisplayName,
+            (res.role ? res.role + ' - ' : '') + (res.unit || unitKey.replace('_', ' ')),
+            res.status || 'حاضر',
+            res.time || new Date().toLocaleTimeString('ar-EG')
+          );
+          return true;
+        } else {
+          showBanner((res && res.message) || '⚠️ تعذر إتمام العملية', 'err');
+          return false;
+        }
+      } catch (err) {
+        showBanner('❌ ' + err.message, 'err');
+        return false;
+      }
+    }
+
+    function updateOfflineButton() {
+      const btn = document.getElementById('syncBtn');
+      const countEl = document.getElementById('offlineCount');
+      countEl.textContent = offlineQueue.length;
+      btn.style.display = offlineQueue.length > 0 ? 'flex' : 'none';
+    }
+
+    async function syncOfflineQueue() {
+      if (offlineQueue.length === 0) return;
+      showBanner('⏳ جاري مزامنة ' + offlineQueue.length + ' عملية محفوظة أوفلاين...', 'warn');
+
+      while (offlineQueue.length > 0 && navigator.onLine) {
+        const item = offlineQueue.shift();
+        localStorage.setItem('SCOUT_UNIFIED_OFFLINE_QUEUE', JSON.stringify(offlineQueue));
+        updateOfflineButton();
+        await sendScanPayloadToServer(item.unitKey, item.payload, item.payload.name || item.payload.qrText);
+      }
+
+      if (offlineQueue.length === 0) {
+        showBanner('✅ تمت مزامنة جميع عمليات الأوفلاين بنجاح!', 'ok');
+      }
+    }
+
+    function getOperatorIdentity() {
+      const inp = document.getElementById('operatorIdentityInput');
+      return inp ? inp.value.trim() : (localStorage.getItem('SCOUT_OPERATOR_EMAIL') || '');
+    }
+
+    function saveOperatorIdentity() {
+      const val = getOperatorIdentity();
+      localStorage.setItem('SCOUT_OPERATOR_EMAIL', val);
+      preloadUnitMembers();
+    }
+
+    function copyIsolatedEntityLink() {
+      const unitKey = document.getElementById('unitSelect').value;
+      const hashSlug = UNIT_HASH_IDS[unitKey] || encodeURIComponent(unitKey);
+      const baseUrl = window.location.href.split('?')[0].split('#')[0];
+      const isolatedUrl = baseUrl + '#' + hashSlug;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(isolatedUrl).then(() => {
+          showBanner('✅ تم نسخ الرابط المعزول لـ (' + unitKey.replace('_', ' ') + '): ' + isolatedUrl, 'ok');
+        }).catch(() => {
+          prompt('انسخ الرابط المعزول لهذه الجهة فقط:', isolatedUrl);
+        });
+      } else {
+        prompt('انسخ الرابط المعزول لهذه الجهة فقط:', isolatedUrl);
+      }
+    }
+
+    /**
+     * 🔒 التحكم الصارم بالـ Hash (`/#id`):
+     * - إذا لم يكن هناك `#id` في الرابط (أو كان غير صحيح)، يتم إخفاء الاسكانر بالكامل وعدم إظهار أي شيء!
+     * - إذا كان الرابط يحتوي على `/#id` صحيح (مثل `/#baraem` أو `/#org` أو `/#براعم`)، يفتح اسكانر هذه الجهة فقط معزولاً تماماً!
+     * - إذا كان الرابط `/#admin` أو `/#master`، يفتح وضع الإدارة لك فقط لنسخ الروابط.
+     */
+    function resolveAndApplyRouteLock() {
+      let rawHash = decodeURIComponent((window.location.hash || '').replace(/^#\/?/, '').trim());
+      if (!rawHash) {
+        const urlParams = new URLSearchParams(window.location.search);
+        rawHash = (urlParams.get('unit') || urlParams.get('id') || '').trim();
+      }
+
+      const lowerHash = rawHash.toLowerCase();
+      const guardScreen = document.getElementById('noHashAccessScreen');
+      const scannerApp = document.getElementById('mainScannerApp');
+
+      // 1. إذا لم يوجد #id في الرابط -> لا يظهر أي شيء إطلاقاً!
+      if (!rawHash) {
+        if (isScanning && html5QrCode) {
+          try { html5QrCode.stop(); isScanning = false; } catch (e) {}
+        }
+        scannerApp.style.display = 'none';
+        guardScreen.style.display = 'block';
+        return;
+      }
+
+      // 2. وضع الأدمن السري لك أنت فقط (/#admin أو /#master)
+      if (lowerHash === 'admin' || lowerHash === 'master') {
+        guardScreen.style.display = 'none';
+        scannerApp.style.display = 'block';
+        document.getElementById('unitSelectorContainer').style.display = 'block';
+        document.getElementById('toggleUrlDrawerBtn').style.display = 'flex';
+        onUnitOrModeChanged();
+        return;
+      }
+
+      // 3. مطابقة الـ #id مع الوحدة أو اللجنة
+      const matchedUnit = HASH_LOOKUP_TO_UNIT[lowerHash] || HASH_LOOKUP_TO_UNIT[rawHash] || HASH_LOOKUP_TO_UNIT[rawHash.replace('_', ' ')];
+      if (!matchedUnit) {
+        if (isScanning && html5QrCode) {
+          try { html5QrCode.stop(); isScanning = false; } catch (e) {}
+        }
+        scannerApp.style.display = 'none';
+        guardScreen.style.display = 'block';
+        return;
+      }
+
+      // 4. فتح الوحدة أو اللجنة المحددة فقط مع إخفاء باقي الوحدات واللجان تماماً
+      guardScreen.style.display = 'none';
+      scannerApp.style.display = 'block';
+      const sel = document.getElementById('unitSelect');
+      sel.value = matchedUnit;
+      document.getElementById('unitSelectorContainer').style.display = 'none';
+      document.getElementById('toggleUrlDrawerBtn').style.display = 'none';
+      document.getElementById('urlDrawer').style.display = 'none';
+      document.getElementById('lockedEntityHeader').style.display = 'block';
+      document.getElementById('lockedEntityTitle').textContent = matchedUnit.replace('_', ' ');
+      onUnitOrModeChanged();
+    }
+
+    window.addEventListener('hashchange', () => {
+      resolveAndApplyRouteLock();
+    });
+
+    window.addEventListener('load', () => {
+      const savedIdentity = localStorage.getItem('SCOUT_OPERATOR_EMAIL') || '';
+      if (savedIdentity && document.getElementById('operatorIdentityInput')) {
+        document.getElementById('operatorIdentityInput').value = savedIdentity;
+      }
+      updateOfflineButton();
+      resolveAndApplyRouteLock();
+    });
+  </script>
+</body>
+</html>

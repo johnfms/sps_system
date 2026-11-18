@@ -1,0 +1,3 @@
+/*
+  Permissions-Policy: camera=(self)
+  Feature-Policy: camera 'self'
