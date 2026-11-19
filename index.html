@@ -231,7 +231,6 @@
             </optgroup>
             <optgroup label="🛡️ اللجان وأمين الصندوق">
               <option value="لجنة_التنظيم" selected>🛡️ لجنة التنظيم (#org)</option>
-              <option value="لجنة_الميديا">🎥 لجنة الميديا (#media)</option>
               <option value="أمين_الصندوق">💰 أمين الصندوق (#treasury)</option>
             </optgroup>
           </select>
@@ -360,6 +359,10 @@
     const GAS_BASE_PREFIX = ['https://script.google', '.com/macros/s/'].join('');
     const GAS_BASE_SUFFIX = ['/ex', 'ec'].join('');
 
+    // 🌐 البوابة الموحدة (System Master Gateway):
+    // ضع رابط الـ /exec الواحد الخاص بشيت System هنا فقط (أو الـ Deployment ID فقط) وسيعمل على الـ 9 وحدات + لجنة التنظيم + أمين الصندوق بتفويض واحد فقط!
+    const MASTER_GATEWAY_URL = "https://script.google.com/macros/s/AKfycbyNHHjftG3UJRPDKJMUrh_xXESsAI-8uZb3c115TsgJFGrhxlK3h2oWwWmvmkV1kyHl/exec";
+
     const DEFAULT_UNIT_URLS = {
       // 1. الوحدات الكشفية الـ 9
       "براعم":        "AKfycbwdv1XvBM6KogEBnxfUO3o9vNQPR_u7jM3oiGknIn3f1n_s3asjLgi-f2gT41eFzx5v",
@@ -458,6 +461,10 @@
     }
 
     function getActiveUnitUrl(unitKey) {
+      // إذا تم وضع رابط البوابة الموحدة (System Master Gateway) يُستخدم تلقائياً لجميع الجهات بتفويض واحد فقط!
+      if (MASTER_GATEWAY_URL && MASTER_GATEWAY_URL.trim()) {
+        return normalizeEndpointUrl(MASTER_GATEWAY_URL.trim());
+      }
       const map = getUnitUrlsMap();
       const raw = (map[unitKey] || map[unitKey.replace('_', ' ')] || '').trim();
       return normalizeEndpointUrl(raw);
