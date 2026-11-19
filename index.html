@@ -360,7 +360,7 @@
     const GAS_BASE_PREFIX = ['https://script.google', '.com/macros/s/'].join('');
     const GAS_BASE_SUFFIX = ['/ex', 'ec'].join('');
 
-        const DEFAULT_UNIT_URLS = {
+    const DEFAULT_UNIT_URLS = {
       // 1. الوحدات الكشفية الـ 9
       "براعم":        "AKfycbwdv1XvBM6KogEBnxfUO3o9vNQPR_u7jM3oiGknIn3f1n_s3asjLgi-f2gT41eFzx5v",
       "أشبال":        "AKfycbzWlEi3X8RZXdxw8vca_POOeLayd1FQr-Lb5MUH7wa7aKbU3DUSXbDmpNGIfkxLPgI0",
@@ -372,12 +372,11 @@
       "جوالة":        "AKfycbxyogVQUVQRiSqvbLrmsbVk4fEbJr07oaP3SDbTlXPk2C-cC2PyFQbkOESfSECL3v-tSw",
       "قادة":         "AKfycby70qyKms16tHAFMxPSN2clhu2G5MLNeNnil3ZreRZDBwmdhp9eWG8c242bQpQ5iWpD7g",
 
-      // 2. روابط اللجان وأمين الصندوق (ضع رابط الـ /exec الخاص بشيت كل لجنة هنا)
+      // 2. اللجان وأمين الصندوق
       "لجنة_التنظيم": "AKfycbwBj2CAiAVqQu81M17zhC0gi0bX9SdjAjArhtmayr-X-qRkuTUFDKPpiMKsT9jXVgC_zw",
       "لجنة_الميديا": "AKfycbwmR-vpxf6N3FoBkvoorDF9Bg4J9mA3NjKwDwI7C9q4ph523sLi6XJJJWWHyftbcwZiNw",
       "أمين_الصندوق": "AKfycbxlprl8xTRmOCrT_LthrxU4lhDR3h3ByeHX-keDkdwz7eTPWsibwnZdHY3i2skwjb3b"
     };
-
 
     /**
      * 🔒 معرّفات الـ Hash (`/#id`) لكل وحدة ولكل لجنة
@@ -454,7 +453,7 @@
     }
 
     function getUnitUrlsMap() {
-      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V2') || '{}');
+      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V3') || '{}');
       return Object.assign({}, DEFAULT_UNIT_URLS, saved);
     }
 
@@ -477,9 +476,9 @@
     function saveCurrentUnitUrl() {
       const unitKey = document.getElementById('unitSelect').value;
       const urlVal = document.getElementById('customUnitUrl').value.trim();
-      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V2') || '{}');
+      const saved = JSON.parse(localStorage.getItem('SCOUT_CUSTOM_UNIT_URLS_V3') || '{}');
       saved[unitKey] = urlVal;
-      localStorage.setItem('SCOUT_CUSTOM_UNIT_URLS_V2', JSON.stringify(saved));
+      localStorage.setItem('SCOUT_CUSTOM_UNIT_URLS_V3', JSON.stringify(saved));
       showBanner('✅ تم حفظ نقطة الاتصال لـ (' + unitKey.replace('_', ' ') + ') بنجاح!', 'ok');
       document.getElementById('urlDrawer').style.display = 'none';
       preloadUnitMembers();
@@ -569,14 +568,26 @@
     }
 
     async function callAppsScriptEndpoint(targetUrl, actionName, payloadObj) {
+      let lastDetail = '';
       if (targetUrl) {
         try {
           const sep = targetUrl.indexOf('?') === -1 ? '?' : '&';
           const getUrl = targetUrl + sep + 'action=' + encodeURIComponent(actionName) + '&data=' + encodeURIComponent(JSON.stringify(payloadObj));
           const resp = await fetch(getUrl, { method: 'GET', redirect: 'follow' });
-          const json = await resp.json();
-          if (json && typeof json.success !== 'undefined') return json;
-        } catch (getErr) {}
+          const txt = await resp.text();
+          try {
+            const json = JSON.parse(txt);
+            if (json && typeof json.success !== 'undefined') return json;
+          } catch (parseErr) {
+            if (txt.indexOf('accounts.google.com') !== -1 || txt.indexOf('ServiceLogin') !== -1) {
+              lastDetail = 'رابط الـ Web App يتطلب صلاحية وصول (أي شخص / Anyone) — راجع إعدادات النشر.';
+            } else {
+              lastDetail = 'رد غير متوقع من السيرفر (تأكد من وجود دالة doGet وتفويض الصلاحيات في شيت ' + (payloadObj.unit || '') + ').';
+            }
+          }
+        } catch (getErr) {
+          lastDetail = 'تعذر الاتصال بالسيرفر (CORS أو الإنترنت): ' + (getErr && getErr.message ? getErr.message : getErr);
+        }
 
         try {
           const respPost = await fetch(targetUrl, {
@@ -585,7 +596,8 @@
             body: JSON.stringify(payloadObj),
             redirect: 'follow'
           });
-          const jsonPost = await respPost.json();
+          const txtPost = await respPost.text();
+          const jsonPost = JSON.parse(txtPost);
           if (jsonPost && typeof jsonPost.success !== 'undefined') return jsonPost;
         } catch (postErr) {}
       }
@@ -599,6 +611,9 @@
         });
       }
 
+      if (lastDetail) {
+        throw new Error(lastDetail);
+      }
       throw new Error('يرجى التأكد من نقطة الاتصال الخاصة بـ (' + (payloadObj.unit || '') + ').');
     }
 
