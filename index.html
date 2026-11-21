@@ -232,6 +232,7 @@
             <optgroup label="🛡️ اللجان وأمين الصندوق">
               <option value="لجنة_التنظيم" selected>🛡️ لجنة التنظيم (#org)</option>
               <option value="أمين_الصندوق">💰 أمين الصندوق (#treasury)</option>
+              <option value="مجلس_القيادة">👑 مجلس قيادة المجموعة (#council)</option>
             </optgroup>
           </select>
           <button id="copyIsolatedLinkBtn" type="button" class="btn btn-secondary" onclick="copyIsolatedEntityLink()" style="margin-top:-4px;margin-bottom:12px;background:#1e3a8a;color:#e0e7ff;">
@@ -363,6 +364,10 @@
     // ضع رابط الـ /exec الواحد الخاص بشيت System هنا فقط (أو الـ Deployment ID فقط) وسيعمل على الـ 9 وحدات + لجنة التنظيم + أمين الصندوق بتفويض واحد فقط!
     const MASTER_GATEWAY_URL = "https://script.google.com/macros/s/AKfycbzX1bvjv7ww_RfQeCAxHyrd6z4wian-EJebuxY5h2L6oEyhVk--D_-9NL4D5oUoCWZB/exec";
 
+    // 👑 رابط الـ /exec المستقل تماماً الخاص بشيت (مجلس قيادة المجموعة) — منفصل عن الماستر تماماً!
+    const COUNCIL_STANDALONE_URL = "https://script.google.com/macros/s/AKfycbwQ-fTT-Om1-lnFDDZhxAxZCMda0Jd7KC_-4pn_9dMD3PJ5ARXyRrz8dfjGo-mrrixq4g/exec";
+
+    
     /**
      * 🔒 معرّفات الـ Hash (`/#id`) لكل وحدة ولكل لجنة
      * يقبل الكود الإنجليزي المختصر (مثل /#baraem أو /#org) أو الاسم العربي (مثل /#براعم أو /#لجنة_التنظيم)
@@ -379,7 +384,8 @@
       "قادة": "kada",
       "لجنة_التنظيم": "org",
       "لجنة_الميديا": "media",
-      "أمين_الصندوق": "treasury"
+      "أمين_الصندوق": "treasury",
+      "مجلس_القيادة": "council"
     };
 
     const HASH_LOOKUP_TO_UNIT = {
@@ -396,6 +402,7 @@
       "org": "لجنة_التنظيم", "tanzim": "لجنة_التنظيم",
       "media": "لجنة_الميديا",
       "treasury": "أمين_الصندوق", "finance": "أمين_الصندوق",
+      "council": "مجلس_القيادة", "leadership": "مجلس_القيادة", "مجلس_القيادة": "مجلس_القيادة", "مجلس القيادة": "مجلس_القيادة", "مجلس قيادة المجموعة": "مجلس_القيادة",
       // الأسماء العربية المباشرة
       "براعم": "براعم",
       "أشبال": "أشبال", "اشبال": "أشبال",
@@ -420,7 +427,8 @@
       "كشاف متقدم": "18:30",
       "رائدات": "18:30",
       "جوالة": "19:30",
-      "قادة": "20:00"
+      "قادة": "20:00",
+      "مجلس_القيادة": "20:00"
     };
 
     let html5QrCode = null;
@@ -443,7 +451,15 @@
     }
 
     function getActiveUnitUrl(unitKey) {
-      // إذا تم وضع رابط البوابة الموحدة (System Master Gateway) يُستخدم تلقائياً لجميع الجهات بتفويض واحد فقط!
+      // 👑 مجلس قيادة المجموعة مستقل تماماً بـ /exec مختلف عن الـ Master Gateway!
+      if (unitKey === 'مجلس_القيادة') {
+        if (COUNCIL_STANDALONE_URL && COUNCIL_STANDALONE_URL.trim()) {
+          return normalizeEndpointUrl(COUNCIL_STANDALONE_URL.trim());
+        }
+        const mapC = getUnitUrlsMap();
+        return normalizeEndpointUrl((mapC['مجلس_القيادة'] || '').trim());
+      }
+      // إذا تم وضع رابط البوابة الموحدة (System Master Gateway) يُستخدم تلقائياً لباقي الجهات بتفويض واحد فقط!
       if (MASTER_GATEWAY_URL && MASTER_GATEWAY_URL.trim()) {
         return normalizeEndpointUrl(MASTER_GATEWAY_URL.trim());
       }
